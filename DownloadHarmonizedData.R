@@ -1,6 +1,6 @@
 
 
-#installed packages
+####installed packages####
 BiocManager::install("sesameData", lib="/mnt/ceph/oluw5072/Rpackages/Work/")
 BiocManager::install("sesame", lib="/mnt/ceph/oluw5072/Rpackages/Work/")
 BiocManager::install("SummarizedExperiment", lib="/mnt/ceph/oluw5072/Rpackages/Work/")
@@ -17,7 +17,7 @@ BiocManager::install("GenomeInfoDb", lib="/mnt/ceph/oluw5072/Rpackages/Work/")
 BiocManager::install("Biobase", lib="/mnt/ceph/oluw5072/Rpackages/Work/")
 BiocManager::install("splitstackshape", lib="/mnt/ceph/oluw5072/Rpackages/Work/")
 
-#load library
+####load library####
 library (TCGAbiolinks, lib.loc="/mnt/ceph/oluw5072/Rpackages/Work/")
 library (BiocGenerics, lib.loc="/mnt/ceph/oluw5072/Rpackages/Work/")
 library (dbplyr, lib.loc="/mnt/ceph/oluw5072/Rpackages/Work/")
