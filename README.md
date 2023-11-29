@@ -2,7 +2,7 @@
 
 The scripts should be used in the following order:
 
-•	DownloadHarmonizedData.R : this files downloads the harmonized methylation data from TCGA, combine it with additional data (gotten from BRCA), and save the processed data for further analysis.
+•	DownloadHarmonizedData.R : this file downloads the harmonized methylation data from TCGA, combine it with additional data (gotten from BRCA), and save the processed data for further analysis.
 
 •	DataProcessing.R: this file performs logit transformation of the methylation data and extracts ER+ and ER- patients from the clinical dataset.
 
