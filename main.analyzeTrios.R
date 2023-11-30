@@ -1,1 +1,54 @@
+##.....Main find PCs.....##
+library(MRGN,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+library(MRTrios,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+#library(MRPC,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+library(data.table,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 
+
+#Load the Methylation dataset
+LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD.meth.logit.txt"))
+dim(LUAD.meth)
+
+#Gene Expression dataset
+LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
+dim(LUAD.gene)
+
+#CNA dataset
+LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_cna.txt")
+dim(LUAD.cna)
+
+#clinical dataset
+clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/new_data_clinical_patient.txt")
+dim(clinical.LUAD)
+
+
+
+#Read in the PC score matrix
+pc.meth<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.meth.txt", header = TRUE)
+
+pc.gene<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.gene.exp.txt", header=TRUE)
+
+
+#reading in the Trios data
+trios <- data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/trio.final.protein.coding.txt"))
+
+#read in the indices table
+meth.table<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/meth.table.txt", drop = 1)
+gene.table<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/gene.exp.table.txt", drop = 1)
+
+
+#read in the sig pcs data
+meth.sig.asso.pcs<- readRDS("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/meth.sig.asso.pcs.RData")
+gene.sig.asso.pcs<- readRDS("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/gene.exp.sig.asso.pcs.RData")
+ 
+
+
+final.result = analyzeTrios(LUAD.meth, LUAD.gene, LUAD.cna, trios[1:100000,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.LUAD, meth.table, gene.table,5,26, writeToFile =TRUE, file= "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD_1.txt")
+
+##Write to file
+write.table(final.result, file = paste("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD_1.txt", sep = ""), sep = "\t", row.names = TRUE,
+            col.names = TRUE,  quote=FALSE)
+
+##read in the analyzeTrios 
+#LUAD.analyzeTrios <- read.table("mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD.txt", header=TRUE)
