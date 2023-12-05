@@ -12,4 +12,8 @@ The scripts should be used in the following order:
 
 •	main.findPCs.R: this file calculates the principal component (PC) score matrix for methylation and separately for gene expression data, and identifies PCs that are significantly associated each trio.
 
+•	Formatting.PatientID.R: this file splits the patient ID to match each other.
+
 •	main.analyzeTrios.R: this file performs causal network inference for trios and their associated confounders (i.e., PCs) to infer the causal models.
+
+•	trioInferenceResults.Plots.R :this file summarizes the trio inference results and generating the bar plots. 
