@@ -15,6 +15,8 @@ LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_
 dim(LUAD.gene)
 
 #clinical dataset
+#read in the clinical dataset
+#formatting clinical to match meth and gene ID's
 
 LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
 dim(LUAD.clinical)
