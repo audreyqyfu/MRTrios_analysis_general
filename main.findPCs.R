@@ -14,10 +14,6 @@ dim(LUAD.meth)
 LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
 dim(LUAD.gene)
 
-#CNA dataset
-LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_cna.txt")
-dim(LUAD.cna)
-
 #clinical dataset
 
 LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
