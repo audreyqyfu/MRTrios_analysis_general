@@ -1,8 +1,8 @@
-##.....Main find PCs.....##
+##.....Main analyzeTrios.....##
 #To install MRTrios package from github
 library(usethis,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 library(devtools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
-install_github("audreyqyfu/MRTrios",lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+install_github("audreyqyfu/MRTrios",lib="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 
 #Load library's
 library(MRGN,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
