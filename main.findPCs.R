@@ -57,16 +57,7 @@ LUAD.gene_1 <- IDsplit(LUAD.gene, delimiter = '-', start_columns = c(3:ncol(LUAD
 write.table(LUAD.gene_1, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_gene.new.txt", sep = "\t", row.names = FALSE,
             col.names = TRUE,quote=FALSE)
 
-#Clinical dataset
 
-LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/LUAD_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
-
-LUAD.cdata<-LUAD.clinical[-(1:4),]
-
-
-#save it to a new text file
-write.table(LUAD.cdata, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt", sep = "\t", row.names = FALSE,
-            col.names = TRUE, quote=FALSE)
 
 #Load the Methylation dataset
 LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_meth.new.txt"))
@@ -88,21 +79,6 @@ dim(clinical.LUAD)
 #read in the clinical dataset
 #formatting clinical to match meth and gene ID's
 
-LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
-dim(LUAD.clinical)
-
-LUAD.cdata<-LUAD.clinical[-(1:4),]
-
-for (i in 1:nrow(LUAD.cdata)) {
-  LUAD.cdata[i, 1] <- paste(LUAD.cdata[i, 1], "-01", sep = "")
-}
-
-#save it to a new text file
-write.table(LUAD.cdata, file = "mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/new_data_clinical_patient.txt", sep = "\t", row.names = FALSE,
-            col.names = TRUE,quote=FALSE)
-
-clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/new_data_clinical_patient.txt")
-dim(clinical.LUAD)
 
 
 #finding common individuals among the 3 datasets
