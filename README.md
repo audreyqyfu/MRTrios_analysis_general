@@ -4,7 +4,7 @@ The scripts should be used in the following order:
 
 •	DownloadHarmonizedData.R : this file downloads the harmonized methylation data from TCGA, combine it with additional data (gotten from BRCA), and save the processed data for further analysis.
 
-•	DataProcessing.R: this file performs logit transformation of the methylation data and extracts ER+ and ER- patients from the clinical dataset.
+•	DataProcessing.R: this file performs logit transformation of the methylation data.
 
 •	mainTrioMatch.R: this file generates the trio data matrix by integrating the CNA, methylation, and gene expression data, with each trio in a separate line and each line containing the row numbers of the probe or gene in the input data.
 
