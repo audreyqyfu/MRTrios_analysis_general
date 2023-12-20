@@ -45,25 +45,25 @@ ggplot(Model_LUAD, aes(x=Var1, y=Freq))+ geom_bar(stat = "identity", fill = "lig
 
 ##################################################
 #Check the list of Total PC.Count
-model_classes<-sapply(LUAD$Total.PC.Count,list)
-unique_classes<-unique(model_classes)
-unique_classes
+Total.PC.Count_classes<-sapply(LUAD$Total.PC.Count,list)
+unique_Total.PC.Count_classes<-unique(Total.PC.Count_classes)
+unique_Total.PC.Count_classes
 
 
 #Check the number of trios for Total.PC.Count
-model_counts<-table(LUAD$Total.PC.Count)
-model_counts
+Total.PC.Count_counts<-table(LUAD$Total.PC.Count)
+Total.PC.Count_counts
 
 #Check the distribution of counts using percentages
-model_percentages<-(model_counts/sum(model_counts))*100
-model_percentages
+Total.PC.Count_percentages<-(Total.PC.Count_counts/sum(Total.PC.Count_counts))*100
+Total.PC.Count_percentages
 
 #Save the percentages
-write.table(model_percentages, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/distribution_of_Total.PC.Count.txt", sep = "\t", row.names = FALSE,
+write.table(Total.PC.Count_percentages, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/distribution_of_Total.PC.Count.txt", sep = "\t", row.names = FALSE,
             col.names = TRUE)
 ## read in the distribution data in desktop
-Model_LUAD <-read_excel("Documents/Research/distribution_of_Total.PC.Count_LUAD.xlsx")
+Total.PC.Count_LUAD <-read_excel("Documents/Research/distribution_of_Total.PC.Count_LUAD.xlsx")
 
 ## plot barplot
-ggplot(model_percentages, aes(x=Var1, y=Freq))+ geom_bar(stat = "identity", fill = "lightblue") + labs(title = "Distribution of Inferred Models_LUAD", x="Inferred Model" , y ="Percentages") + geom_text(aes(label=round(Freq,1)), vjust =-0.5, size =3)
+ggplot(Total.PC.Count_percentages, aes(x=Var1, y=Freq))+ geom_bar(stat = "identity", fill = "lightblue") + labs(title = "Distribution of Inferred Models_LUAD", x="Inferred Model" , y ="Percentages") + geom_text(aes(label=round(Freq,1)), vjust =-0.5, size =3)
 
