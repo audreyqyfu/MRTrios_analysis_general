@@ -71,16 +71,6 @@ dim(LUAD.gene)
 LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_cna.new.txt")
 dim(LUAD.cna)
 
-#clinical dataset
-clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt")
-dim(clinical.LUAD)
-
-#clinical dataset
-#read in the clinical dataset
-#formatting clinical to match meth and gene ID's
-
-
-
 #finding common individuals among the 3 datasets
 com.ind = intersect(colnames(LUAD.gene)[3:ncol(LUAD.gene)], colnames(LUAD.meth)[5:ncol(LUAD.meth)])
 
