@@ -26,11 +26,15 @@ dim(LUAD.cna)
 
 #Clinical dataset
 LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/LUAD_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
+#Remove the first 4 rows that are not needed for the analysis
 LUAD.cdata<-LUAD.clinical[-(1:4),]
 
 #save it to a new text file
 write.table(LUAD.cdata, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt", sep = "\t", row.names = FALSE,
             col.names = TRUE, quote=FALSE)
+#load the new clinical dataset
+clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt")
+dim(clinical.LUAD)
 
 
 
