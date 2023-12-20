@@ -14,6 +14,76 @@ dim(LUAD.meth)
 LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
 dim(LUAD.gene)
 
+#CNA dataset
+LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_cna.txt")
+dim(LUAD.cna)
+
+
+
+#splitting ID function
+IDsplit <- function(data, delimiter = '-', start_columns = NULL) {
+  
+  for (col_index in start_columns) {
+    
+    split_names <- unlist(strsplit(colnames(data)[col_index], delimiter))
+    
+    # Ensure at least four parts exist before merging
+    if (length(split_names) >= 4) {
+      new_rowname <- paste(split_names[1:3], collapse = delimiter)
+      colnames(data)[col_index] <- new_rowname
+    }
+  }
+  return(data)
+}
+
+
+#split ID name for METH, start splitting from column 5
+LUAD.meth_1 <- IDsplit(LUAD.meth, delimiter = '-', start_columns = c(5:ncol(LUAD.meth)))
+#save it to a new text file
+write.table(LUAD.meth_1, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_meth.new.txt", sep = "\t", row.names = FALSE,
+            col.names = TRUE,quote=FALSE)
+
+#split ID name for cna data seT, start splitting from column 3
+LUAD.cna_1 <- IDsplit(LUAD.cna, delimiter = '-', start_columns = c(3:ncol(LUAD.cna)))
+
+#save it to a new text file
+write.table(LUAD.cna_1, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_cna.new.txt", sep = "\t", row.names = FALSE,
+            col.names = TRUE,quote=FALSE)
+
+#split ID name for gene data set, start splitting from column 3
+LUAD.gene_1 <- IDsplit(LUAD.gene, delimiter = '-', start_columns = c(3:ncol(LUAD.gene)))
+
+#save it to a new text file
+write.table(LUAD.gene_1, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_gene.new.txt", sep = "\t", row.names = FALSE,
+            col.names = TRUE,quote=FALSE)
+
+#Clinical dataset
+
+LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/LUAD_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
+
+LUAD.cdata<-LUAD.clinical[-(1:4),]
+
+
+#save it to a new text file
+write.table(LUAD.cdata, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt", sep = "\t", row.names = FALSE,
+            col.names = TRUE, quote=FALSE)
+
+#Load the Methylation dataset
+LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_meth.new.txt"))
+dim(LUAD.meth)
+
+#Gene Expression dataset
+LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_gene.new.txt")
+dim(LUAD.gene)
+
+#CNA dataset
+LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_cna.new.txt")
+dim(LUAD.cna)
+
+#clinical dataset
+clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt")
+dim(clinical.LUAD)
+
 #clinical dataset
 #read in the clinical dataset
 #formatting clinical to match meth and gene ID's
