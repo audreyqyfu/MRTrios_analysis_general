@@ -12,16 +12,16 @@ library(data.table,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 
 
-#Load the Methylation dataset
-LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD.meth.logit.txt"))
+#Load the new Methylation dataset
+LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_meth.new.txt"))
 dim(LUAD.meth)
 
-#Gene Expression dataset
-LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
+#new Gene Expression dataset
+LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_gene.new.txt")
 dim(LUAD.gene)
 
-#CNA dataset
-LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_cna.txt")
+#new CNA dataset
+LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_cna.new.txt")
 dim(LUAD.cna)
 
 #Clinical dataset
