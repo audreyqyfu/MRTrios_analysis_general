@@ -12,30 +12,42 @@ library(data.table,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 
 
-#Load the new Methylation dataset
-LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_meth.new.txt"))
+##.....main analyzeTrios.....##
+library(MRGN,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+library(MRTrios,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+#library(MRPC,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+library(data.table,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
+
+
+#Load the Methylation dataset
+LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD.meth.logit.txt"))
 dim(LUAD.meth)
 
-#new Gene Expression dataset
-LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_gene.new.txt")
+# Apply partial matching to column names 
+colnames(LUAD.meth)[5:ncol(LUAD.meth)] <- sapply(strsplit(colnames(LUAD.meth)[5:ncol(LUAD.meth)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+LUAD.meth[1, 1:10]
+
+
+#Gene Expression dataset
+LUAD.gene<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
 dim(LUAD.gene)
 
-#new CNA dataset
-LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_cna.new.txt")
+# Apply partial matching to column names
+colnames(LUAD.gene)[3:ncol(LUAD.gene)] <- sapply(strsplit(colnames(LUAD.gene)[3:ncol(LUAD.gene)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+LUAD.gene[1, 1:10]
+
+#CNA dataset
+LUAD.cna<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_cna.txt")
 dim(LUAD.cna)
 
-#Clinical dataset
-LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/LUAD_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
-#Remove the first 4 rows that are not needed for the analysis
-LUAD.cdata<-LUAD.clinical[-(1:4),]
+# Apply partial matching to column names
+colnames(LUAD.cna)[3:ncol(LUAD.cna)] <- sapply(strsplit(colnames(LUAD.cna)[3:ncol(LUAD.cna)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+LUAD.cna[1, 1:10]
 
-#save it to a new text file
-write.table(LUAD.cdata, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt", sep = "\t", row.names = FALSE,
-            col.names = TRUE, quote=FALSE)
-#load the new clinical dataset
+#clinical dataset                                               
 clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt")
 dim(clinical.LUAD)
-
 
 
 #Read in the PC score matrix
