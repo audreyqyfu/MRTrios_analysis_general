@@ -12,14 +12,6 @@ library(data.table,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 
 
-##.....main analyzeTrios.....##
-library(MRGN,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
-library(MRTrios,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
-#library(MRPC,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
-library(data.table,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
-library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
-
-
 #Load the Methylation dataset
 LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD.meth.logit.txt"))
 dim(LUAD.meth)
