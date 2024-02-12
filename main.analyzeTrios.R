@@ -43,9 +43,12 @@ dim(clinical.LUAD)
 
 
 #Read in the PC score matrix
+#Read in the PC score matrix
 pc.meth<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.meth.txt", header = TRUE)
+rownames(pc.meth) <- sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-"))
 
 pc.gene<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.gene.exp.txt", header=TRUE)
+rownames(pc.gene) <- sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-"))
 
 
 #reading in the Trios data
