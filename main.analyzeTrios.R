@@ -37,6 +37,7 @@ dim(LUAD.cna)
 colnames(LUAD.cna)[3:ncol(LUAD.cna)] <- sapply(strsplit(colnames(LUAD.cna)[3:ncol(LUAD.cna)], "-"), function(parts) paste(parts[1:3], collapse="-"))
 LUAD.cna[1, 1:10]
 
+ #Clinical Dataset                                              
 LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
 #Remove the first 4 rows that are not needed for the analysis
 LUAD.cdata<-LUAD.clinical[-(1:4),]
