@@ -15,3 +15,5 @@ The scripts should be used in the following order:
 •	main.analyzeTrios.R: this file performs causal network inference for trios and their associated confounders (i.e., PCs) to infer the causal models.
 
 •	trioInferenceResults.Plots.R :this file summarizes the trio inference results and generating the bar plots. 
+
+•	Baycn.R : this file applies Bayesian inference to obtain the probabilities of edges in inferred models.
