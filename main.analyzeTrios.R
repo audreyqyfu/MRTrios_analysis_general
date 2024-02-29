@@ -16,7 +16,7 @@ library(na.tools,lib.loc="/mnt/ceph/oluw5072/Rpackages/MRGN_R/")
 LUAD.meth<- as.data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD.meth.logit.txt"))
 dim(LUAD.meth)
 
-# Apply partial matching to column names 
+# Apply partial matching to column names #I am using this
 colnames(LUAD.meth)[5:ncol(LUAD.meth)] <- sapply(strsplit(colnames(LUAD.meth)[5:ncol(LUAD.meth)], "-"), function(parts) paste(parts[1:3], collapse="-"))
 LUAD.meth[1, 1:10]
 
@@ -37,19 +37,31 @@ dim(LUAD.cna)
 colnames(LUAD.cna)[3:ncol(LUAD.cna)] <- sapply(strsplit(colnames(LUAD.cna)[3:ncol(LUAD.cna)], "-"), function(parts) paste(parts[1:3], collapse="-"))
 LUAD.cna[1, 1:10]
 
-#clinical dataset                                               
+LUAD.clinical<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/luad_tcga_pan_can_atlas_2018/data_clinical_patient.txt")
+#Remove the first 4 rows that are not needed for the analysis
+LUAD.cdata<-LUAD.clinical[-(1:4),]
+#save it to a new text file
+write.table(LUAD.cdata, file = "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt", sep = "\t", row.names = FALSE,
+            col.names = TRUE, quote=FALSE)
+#load the new clinical dataset
 clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.LUAD_clinical.new.txt")
 dim(clinical.LUAD)
 
-
-#Read in the PC score matrix
 #Read in the PC score matrix
 pc.meth<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.meth.txt", header = TRUE)
-rownames(pc.meth) <- sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+#rownames(pc.meth) <- sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+#new function to Generate unique row names 
+new_row_names <- make.unique(sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-")))
+# assign the modified row names back to the data frame
+rownames(pc.meth) <- new_row_names
 
 pc.gene<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.gene.exp.txt", header=TRUE)
-rownames(pc.gene) <- sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+#rownames(pc.gene) <- sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-"))
 
+# new function to Generate unique row names 
+new_row_names <- make.unique(sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-")))
+# Assign the modified row names back to the data frame
+rownames(pc.gene) <- new_row_names
 
 #reading in the Trios data
 trios <- data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/trio.final.protein.coding.txt"))
@@ -62,14 +74,7 @@ gene.table<- fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/gene.exp.table
 #read in the sig pcs data
 meth.sig.asso.pcs<- readRDS("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/meth.sig.asso.pcs.RData")
 gene.sig.asso.pcs<- readRDS("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/gene.exp.sig.asso.pcs.RData")
- 
+
+final.result = analyzeTrios(LUAD.meth, LUAD.gene, LUAD.cna, trios[1:100000,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.LUAD, meth.table, gene.table,age.col=5, race.col=26, sex.col=6, writeToFile =TRUE, file= "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD_4.txt")
 
 
-final.result = analyzeTrios(LUAD.meth, LUAD.gene, LUAD.cna, trios[1:100000,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.LUAD, meth.table, gene.table,5,26, writeToFile =TRUE, file= "/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD_1.txt")
-
-##Write to file
-write.table(final.result, file = paste("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD_1.txt", sep = ""), sep = "\t", row.names = TRUE,
-            col.names = TRUE,  quote=FALSE)
-
-##read in the analyzeTrios 
-#LUAD.analyzeTrios <- read.table("mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/analyze.trios.LUAD.txt", header=TRUE)
