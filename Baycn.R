@@ -4,16 +4,28 @@ library(MRGN,lib.loc="/mnt/ceph/fern5249/Rpackages")
 library(MRTrios,lib.loc="/mnt/ceph/fern5249/Rpackages")
 library(baycn,lib.loc="/mnt/ceph/fern5249/Rpackages")
 
-#read in the original datasets
+BLCA.meth<- as.data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.meth.logit.txt"))
+dim(BLCA.meth)
+# Apply partial matching to column names #I am using this
+colnames(BLCA.meth)[5:ncol(BLCA.meth)] <- sapply(strsplit(colnames(BLCA.meth)[5:ncol(BLCA.meth)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+BLCA.meth[1, 1:10]
+
+
 #Gene Expression dataset
-BLCA.gene<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.gene.new.test.txt")
+BLCA.gene<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/blca_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
+dim(BLCA.gene)
+# Apply partial matching to column names
+colnames(BLCA.gene)[3:ncol(BLCA.gene)] <- sapply(strsplit(colnames(BLCA.gene)[3:ncol(BLCA.gene)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+BLCA.gene[1, 1:10]
+
 
 #CNA dataset
-BLCA.cna<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.cna.new.test.txt")
+BLCA.cna<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/blca_tcga_pan_can_atlas_2018/data_cna.txt")
+dim(BLCA.cna)
+# Apply partial matching to column names
+colnames(BLCA.cna)[3:ncol(BLCA.cna)] <- sapply(strsplit(colnames(BLCA.cna)[3:ncol(BLCA.cna)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+BLCA.cna[1, 1:10]
 
-
-#Methylation data set
-BLCA.meth<- as.data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.meth.new.test.txt"))
 
 
 #clinical data
@@ -21,22 +33,35 @@ clinical.BLCA<-fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split_new_da
 
 
 #Read in the PC score matrix
-pc.meth<- read.table("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/PCA.meth.new.txt", header = TRUE)
+pc.meth<- read.table("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/PCA.meth.txt", header = TRUE)
+#rownames(pc.meth) <- sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+#new function to Generate unique row names 
+new_row_names <- make.unique(sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-")))
+# assign the modified row names back to the data frame
+rownames(pc.meth) <- new_row_names
 
-pc.gene<- read.table("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/PCA.gene.exp.new.txt",header=TRUE)
+
+pc.gene<- read.table("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/PCA.gene.exp.txt",header=TRUE)
+#rownames(pc.gene) <- sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+
+# new function to Generate unique row names 
+new_row_names <- make.unique(sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-")))
+# Assign the modified row names back to the data frame
+rownames(pc.gene) <- new_row_names
+
 
 
 #reading in the Trios data
 trios <- data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/trio.final.protein.coding.txt"))
 
 #read in the indices table
-meth.table<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/meth.table.new.txt", drop = 1)
-gene.table<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/gene.exp.table.new.txt", drop = 1)
+meth.table<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/meth.table.txt", drop = 1)
+gene.table<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/gene.exp.table.txt", drop = 1)
 
 
 #read in the sig pcs data
-meth.sig.asso.pcs<- readRDS("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/meth.sig.asso.pcs.new.RData")
-gene.sig.asso.pcs<- readRDS("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/gene.exp.sig.asso.pcs.new.RData")
+meth.sig.asso.pcs<- readRDS("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/meth.sig.asso.pcs.RData")
+gene.sig.asso.pcs<- readRDS("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/gene.exp.sig.asso.pcs.RData")
 
 
 datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical, meth.table, gene.table, age.col=5, race.col=26, sex.col=6, nObs = 30, nPCs = 50, writeToFile = FALSE, file){
@@ -167,7 +192,7 @@ t2[1:10]
 t3<-matrix(t2,byrow=FALSE,nrow=nrow(t1))
 colnames(t3)<-colnames(t1)
 #Move confounders up so they can be treated as genetic variants
-t4 <- t3[,c(1,4:12, 2, 3)]
+t4 <- t3[,c(1,4:ncol(t3), 2, 3)]
 
 
 #For the 1st Trio
@@ -201,3 +226,7 @@ mh_m1_BLCA<- mhEdge(data=t4,
                      progress = FALSE)
 
 summary(mh_m1_BLCA)
+                                    
+#Check the model type using infer.trio
+res = infer.trio(as.data.frame(data_BLCA), use.perm = TRUE, is.CNA = TRUE, nperms = 500)
+res[,ncol(res)]
