@@ -93,12 +93,6 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   #initialize result
   result <- NULL
   
-  # write to file if writeToFile is TRUE
-  #if (writeToFile) {
-  #result.colnames <- c("V1","V2","V3","PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10", "Age", "Race", "Sex")
-  #write.table(t(result.colnames), file = file, sep = "\t", row.names = FALSE, col.names = FALSE, append = FALSE, quote = FALSE)
-  #}
-  
   #begin the loop for rows in trios
   for(i in 1:nrow(trios)){
     
@@ -179,46 +173,39 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   return(result)
   
 }
+
+#For the 1st Trio                                    
 data_BLCA=datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.BLCA, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
 
 
 #Remove race  column
 t1 <- data_BLCA[, -which(names(data_BLCA) %in% c("race"))]
+#converting a categorical variable sex into a binary variable,                                     
 t1$sex <- ifelse(t1$sex == "Male", 0, 1)
-t1[1:5,]
 #unlist the data matrix data_BLCA
 t2<-unlist(t1)
-t2[1:10]
 t3<-matrix(t2,byrow=FALSE,nrow=nrow(t1))
 colnames(t3)<-colnames(t1)
 #Move confounders up so they can be treated as genetic variants
 t4 <- t3[,c(1,4:ncol(t3), 2, 3)]
 
 
-#For the 1st Trio
-#Create an adjacency matrix which matches with the data_BLCA matrix
-am_m1_BLCA<- matrix(c(0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,1,
-                        0, 0,0,0,0,0,0,0,0,0,0,1,
-                        0, 0,0,0,0,0,0,0,0,0,1,0),
-                      byrow =TRUE,
-                      nrow = 12)
+# Create an adjacency matrix with the true edges.
+# create an adjacency matrix with zeros
+am_m1_BLCA<- matrix(0, nrow=ncol(t4), ncol=ncol(t4))
+# fill the last 2 columns with 1
+am_m1_BLCA[, (ncol(t4)-1):ncol(t4)] <- 1
+am_m1_BLCA[(ncol(t4)), (ncol(t4))] <- 0
+am_m1_BLCA[(ncol(t4)-1), (ncol(t4)-1)] <- 0
 
+# Run the Metropolis-Hastings algorithm on the data from data_BLCA using the Principle of Mendelian Randomization (PMR) and the true edges as the input.
 mh_m1_BLCA<- mhEdge(data=t4,
-                     adjMatrix =am_m1_BLCA,
-                     prior = c(0.05,
-                               0.05,
-                               0.9),
+                    adjMatrix =am_m1_BLCA ,
+                    prior = c(0.05,
+                              0.05,
+                              0.9),
                      nCPh = 0,
-                     nGV = 10,
+                     nGV = ncol(t4)-2,
                      pmr = TRUE,
                      burnIn = 0.2,
                      iterations = 1000,
