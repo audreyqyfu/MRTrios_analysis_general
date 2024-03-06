@@ -174,7 +174,8 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   
 }
 
-#For the 1st Trio                                    
+#For any Trio
+#example: using 1st Trio
 data_BLCA=datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.BLCA, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
 
 
