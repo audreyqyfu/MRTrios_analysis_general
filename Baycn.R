@@ -174,50 +174,7 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   
 }
 
-#For any Trio
-#example: using 1st Trio
 data_BLCA=datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.BLCA, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
-
-
-#Remove race  column
-t1 <- data_BLCA[, -which(names(data_BLCA) %in% c("race"))]
-#converting a categorical variable sex into a binary variable,                                     
-t1$sex <- ifelse(t1$sex == "Male", 0, 1)
-#unlist the data matrix data_BLCA
-t2<-unlist(t1)
-t3<-matrix(t2,byrow=FALSE,nrow=nrow(t1))
-colnames(t3)<-colnames(t1)
-#Move confounders up so they can be treated as genetic variants
-t4 <- t3[,c(1,4:ncol(t3), 2, 3)]
-
-
-# Create an adjacency matrix with the true edges.
-# create an adjacency matrix with zeros
-am_m1_BLCA<- matrix(0, nrow=ncol(t4), ncol=ncol(t4))
-# fill the last 2 columns with 1
-am_m1_BLCA[, (ncol(t4)-1):ncol(t4)] <- 1
-am_m1_BLCA[(ncol(t4)), (ncol(t4))] <- 0
-am_m1_BLCA[(ncol(t4)-1), (ncol(t4)-1)] <- 0
-
-# Run the Metropolis-Hastings algorithm on the data from data_BLCA using the Principle of Mendelian Randomization (PMR) and the true edges as the input.
-mh_m1_BLCA<- mhEdge(data=t4,
-                    adjMatrix =am_m1_BLCA ,
-                    prior = c(0.05,
-                              0.05,
-                              0.9),
-                     nCPh = 0,
-                     nGV = ncol(t4)-2,
-                     pmr = TRUE,
-                     burnIn = 0.2,
-                     iterations = 1000,
-                     thinTo = 200,
-                     progress = FALSE)
-
-summary(mh_m1_BLCA)
-                                    
-#Check the model type using infer.trio
-res = infer.trio(as.data.frame(data_BLCA), use.perm = TRUE, is.CNA = TRUE, nperms = 500)
-res[,ncol(res)]
 ###############################################################################################################################
 #Use a function to generate the results
 baycn_summary_results <- function(data_BLCA, trios, BLCA.meth, BLCA.gene, BLCA.cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical.BLCA, meth.table, gene.table) {
