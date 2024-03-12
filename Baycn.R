@@ -4,32 +4,32 @@ library(MRGN,lib.loc="/mnt/ceph/fern5249/Rpackages")
 library(MRTrios,lib.loc="/mnt/ceph/fern5249/Rpackages")
 library(baycn,lib.loc="/mnt/ceph/fern5249/Rpackages")
 
-BLCA.meth<- as.data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.meth.logit.txt"))
-dim(BLCA.meth)
+meth<- as.data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.meth.logit.txt"))
+dim(meth)
 # Apply partial matching to column names #I am using this
-colnames(BLCA.meth)[5:ncol(BLCA.meth)] <- sapply(strsplit(colnames(BLCA.meth)[5:ncol(BLCA.meth)], "-"), function(parts) paste(parts[1:3], collapse="-"))
-BLCA.meth[1, 1:10]
+colnames(meth)[5:ncol(meth)] <- sapply(strsplit(colnames(meth)[5:ncol(meth)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+meth[1, 1:10]
 
 
 #Gene Expression dataset
-BLCA.gene<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/blca_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
-dim(BLCA.gene)
+gene<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/blca_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_all_samples.txt")
+dim(gene)
 # Apply partial matching to column names
-colnames(BLCA.gene)[3:ncol(BLCA.gene)] <- sapply(strsplit(colnames(BLCA.gene)[3:ncol(BLCA.gene)], "-"), function(parts) paste(parts[1:3], collapse="-"))
-BLCA.gene[1, 1:10]
+colnames(gene)[3:ncol(gene)] <- sapply(strsplit(colnames(gene)[3:ncol(gene)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+gene[1, 1:10]
 
 
 #CNA dataset
-BLCA.cna<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/blca_tcga_pan_can_atlas_2018/data_cna.txt")
-dim(BLCA.cna)
+cna<- fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/blca_tcga_pan_can_atlas_2018/data_cna.txt")
+dim(cna)
 # Apply partial matching to column names
-colnames(BLCA.cna)[3:ncol(BLCA.cna)] <- sapply(strsplit(colnames(BLCA.cna)[3:ncol(BLCA.cna)], "-"), function(parts) paste(parts[1:3], collapse="-"))
-BLCA.cna[1, 1:10]
+colnames(cna)[3:ncol(cna)] <- sapply(strsplit(colnames(cna)[3:ncol(cna)], "-"), function(parts) paste(parts[1:3], collapse="-"))
+cna[1, 1:10]
 
 
 
 #clinical data
-clinical.BLCA<-fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split_new_data_clinical_patient.txt")
+clinical<-fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split_new_data_clinical_patient.txt")
 
 
 #Read in the PC score matrix
@@ -92,6 +92,8 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   
   #initialize result
   result <- NULL
+  
+  
   
   #begin the loop for rows in trios
   for(i in 1:nrow(trios)){
@@ -174,22 +176,22 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   
 }
 
-data_BLCA=datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.BLCA, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
-###############################################################################################################################
-#Use a function to generate the results
-baycn_summary_results <- function(data_BLCA, trios, BLCA.meth, BLCA.gene, BLCA.cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical.BLCA, meth.table, gene.table) {
-  results <- NULL
+#data=datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[15,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.BLCA, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
+
+
+baycn_summary_results <- function(data, trios,meth, gene,cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical, meth.table, gene.table) {
+  results <- list()  # Initialize an empty list to store results
   
-  #begin the loop for rows in trios
+  #begin the loop for rows in trios 
   for (i in 1:nrow(trios)) {
     cat("Trio", i, ":\n")
-    data_BLCA <- datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical.BLCA, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
+    data<- datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
     
     # Remove race column
-    t1 <- data_BLCA[, -which(names(data_BLCA) %in% c("race"))]
+    t1 <- data[, -which(names(data) %in% c("race"))]
     t1$sex <- ifelse(t1$sex == "Male", 0, 1)
     
-    # Unlist the data matrix data_BLCA
+    # Unlist the data matrix 
     t2 <- unlist(t1)
     t3 <- matrix(t2, byrow = FALSE, nrow = nrow(t1))
     colnames(t3) <- colnames(t1)
@@ -198,14 +200,14 @@ baycn_summary_results <- function(data_BLCA, trios, BLCA.meth, BLCA.gene, BLCA.c
     t4 <- t3[, c(1, 4:ncol(t3), 2, 3)]
     
     # Create an adjacency matrix
-    am_m1_BLCA <- matrix(0, nrow = ncol(t4), ncol = ncol(t4))
-    am_m1_BLCA[, (ncol(t4) - 1):ncol(t4)] <- 1
-    am_m1_BLCA[(ncol(t4)), (ncol(t4))] <- 0
-    am_m1_BLCA[(ncol(t4) - 1), (ncol(t4) - 1)] <- 0
+    am_m1<- matrix(0, nrow = ncol(t4), ncol = ncol(t4))
+    am_m1[, (ncol(t4) - 1):ncol(t4)] <- 1
+    am_m1[(ncol(t4)), (ncol(t4))] <- 0
+    am_m1[(ncol(t4) - 1), (ncol(t4) - 1)] <- 0
     
     # Run the mhEdge function
-    mh_m1_BLCA <- mhEdge(data = t4,
-                         adjMatrix = am_m1_BLCA,
+    mh_m1<- mhEdge(data = t4,
+                         adjMatrix = am_m1,
                          prior = c(0.05, 0.05, 0.9),
                          nCPh = 0,
                          nGV = ncol(t4) - 2,
@@ -214,20 +216,58 @@ baycn_summary_results <- function(data_BLCA, trios, BLCA.meth, BLCA.gene, BLCA.c
                          iterations = 1000,
                          thinTo = 200,
                          progress = FALSE)
+    posterior_probs <- mh_m1@posteriorES
     
-    # Check the model type using infer.trio
-    res <- infer.trio(as.data.frame(data_BLCA), use.perm = TRUE, is.CNA = TRUE, nperms = 500)
-    inferred_model <- res[, ncol(res)]
+    # Extract the relevant rows for posterior probabilities
+    edges <- posterior_probs[c(1, 2, nrow(posterior_probs)), ]
+    
+    # Check inferred model type
+    if (edges[1, "zero"] == max(edges[1, -1]) && 
+        edges[2, "two"] == max(edges[2, -1]) &&
+        edges[nrow(edges), "two"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M0.1"
+    } else if (edges[1, "two"] == max(edges[1, -1]) && 
+               edges[2, "zero"] == max(edges[2, -1]) &&
+               edges[nrow(edges), "two"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M0.2"
+    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
+               edges[2, "two"] == max(edges[2, -1]) &&
+               edges[nrow(edges), "zero"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M1.1"
+    } else if (edges[1, "two"] == max(edges[1, -1]) && 
+               edges[2, "zero"] == max(edges[2, -1]) &&
+               edges[nrow(edges), "one"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M1.2"
+    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
+               edges[2, "two"] == max(edges[2, -1]) &&
+               edges[nrow(edges), "one"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M2.1"
+    } else if (edges[1, "two"] == max(edges[1, -1]) && 
+               edges[2, "zero"] == max(edges[2, -1]) &&
+               edges[nrow(edges), "zero"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M2.2"
+    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
+               edges[2, "zero"] == max(edges[2, -1]) &&
+               edges[nrow(edges), "two"] == max(edges[nrow(edges), -1])) {
+      model_type <- "M3"
+    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
+               edges[2, "zero"] == max(edges[2, -1]) &&
+               (edges[nrow(edges), "zero"] == max(edges[nrow(edges), -1]) || edges[nrow(edges), "one"] == max(edges[nrow(edges), -1]))) {
+      model_type <- "M4"
+    } else {
+      model_type <- "Other"
+    }
     
     # Store results
-    results <- list(summary_mh = summary(mh_m1_BLCA), model = inferred_model)
+    results[[i]] <- list(summary_mh = summary(mh_m1), model = model_type)
     
     cat("\n")
     cat("Inferred model:\n")
-    print(results$model)
+    print(results[[i]]$model)
     cat("\n\n")
   }
   
   return(results)
 }
-baycn.results<-baycn_summary_results(data_BLCA, trios[1:5], BLCA.meth, BLCA.gene, BLCA.cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical.BLCA, meth.table, gene.table)
+
+baycn.results <- baycn_summary_results(data, trios[1:5,], meth, gene, cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical, meth.table, gene.table)
