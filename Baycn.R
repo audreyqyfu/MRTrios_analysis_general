@@ -6,7 +6,7 @@ library(baycn,lib.loc="/mnt/ceph/fern5249/Rpackages")
 
 meth<- as.data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split.names.BLCA.meth.logit.txt"))
 dim(meth)
-# Apply partial matching to column names #I am using this
+# Apply partial matching to column names
 colnames(meth)[5:ncol(meth)] <- sapply(strsplit(colnames(meth)[5:ncol(meth)], "-"), function(parts) paste(parts[1:3], collapse="-"))
 meth[1, 1:10]
 
@@ -176,7 +176,7 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
   
 }
 
-#data=datamatrix(BLCA.meth, BLCA.gene, BLCA.cna, trios[15,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical.BLCA, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
+#data=datamatrix(meth, gene, cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
 
 
 baycn_summary_results <- function(data, trios,meth, gene,cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical, meth.table, gene.table) {
