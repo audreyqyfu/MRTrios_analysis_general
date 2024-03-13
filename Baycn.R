@@ -258,9 +258,11 @@ baycn_summary_results <- function(data, trios) {
     }
     
     # Store results
-    results[[i]] <- list(summary_mh = summary(mh_m1), model = model_type)
+    results[[i]] <- list(summary_mh=edges,model = model_type)
     
     cat("\n")
+    cat("Summary:\n")
+    print(results[[i]]$summary_mh)
     cat("Inferred model:\n")
     print(results[[i]]$model)
     cat("\n\n")
