@@ -155,25 +155,24 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
             # Remove the "race" column if it doesn't have at least 2 levels
             if (nlevels(as.factor(final.mat.complete$race)) < 2){
               final.mat.complete <- final.mat.complete[, -which(names(final.mat.complete) == "race")]
-              
-              
+              # Remove the "sex" column if it doesn't have at least 2 levels
+      if (nlevels(as.factor(final.mat.complete$sex)) < 2){
+        final.mat.complete <- final.mat.complete[, -which(names(final.mat.complete) == "sex")]
+      }
               # write to file if writeToFile is TRUE
               if (writeToFile) {
                 write.table(final.mat.complete,file = file, sep = "\t", row.names = FALSE, col.names = FALSE, append = TRUE, quote = FALSE)
               }
             }
           }
-          
-          result <-  final.mat.complete
-          
+          result <-  final.mat.complete  
         }
       }
     }
   }
   #return the dataset
   colnames(result)[1] <- "V1"
-  return(result)
-  
+  return(result)  
 }
 
 #data=datamatrix(meth, gene, cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
