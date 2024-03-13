@@ -179,7 +179,7 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
 #data=datamatrix(meth, gene, cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
 
 
-baycn_summary_results <- function(data, trios,meth, gene,cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical, meth.table, gene.table) {
+baycn_summary_results <- function(data, trios) {
   results <- list()  # Initialize an empty list to store results
   
   #begin the loop for rows in trios 
@@ -270,4 +270,4 @@ baycn_summary_results <- function(data, trios,meth, gene,cna, pc.meth, pc.gene, 
   return(results)
 }
 
-baycn.results <- baycn_summary_results(data, trios[1:5,], meth, gene, cna, pc.meth, pc.gene, meth.sig.asso.pcs, gene.sig.asso.pcs, clinical, meth.table, gene.table)
+baycn.results <- baycn_summary_results(data, trios[1:5,])
