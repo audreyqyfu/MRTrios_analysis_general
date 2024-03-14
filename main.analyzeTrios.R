@@ -49,36 +49,40 @@ clinical.LUAD<-fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/split.names.
 dim(clinical.LUAD)
 
 #Read in the PC score matrix
-pc.meth<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUSC/Analysis/PCA.meth.txt", header = TRUE)
+pc.meth<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-SKCM/Analysis/PCA.meth.txt", header = TRUE)
 # Extract the first three elements from the row names and collapse them with hyphens
 new_row_names <- sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-"))
 # Identify duplicated row names
-duplicated_rows <- duplicated(new_row_names)
-# Subset the data frame to remove duplicated rows
-pc.meth <- subset(pc.meth, !duplicated_rows)
-# Assign the modified row names to the unique data frame
-rownames(pc.meth) <- new_row_names[!duplicated_rows]
-
-# Identify the duplicated row names in pc.meth
-duplicated_rows <- duplicated(new_row_names)
+duplicated_rows <- which(duplicated(new_row_names) | duplicated(new_row_names, fromLast = TRUE))
 # Get the row names of pc.meth that are duplicated
-duplicated_row_names <- unique(new_row_names[duplicated_rows])
-# Remove corresponding columns from LUAD.cna
-LUAD.cna <- LUAD.cna[, !colnames(LUAD.cna) %in% duplicated_row_names, with = FALSE]
-# Check the dimensions of the updated dataset
-dim(LUAD.cna)
+duplicated_row_names <- new_row_names[duplicated_rows]
+# Subset the data frame to remove duplicated rows
+pc.meth <- pc.meth[-duplicated_rows,]
+# Assign the modified row names to the unique data frame
+rownames(pc.meth) <- new_row_names[-duplicated_rows]
+dim(pc.meth)
 
-pc.gene<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/PCA.gene.exp.txt", header=TRUE)
+# Remove corresponding columns from SKCM.cna
+SKCM.cna <- SKCM.cna[, !colnames(SKCM.cna) %in% duplicated_row_names, with = FALSE]
+
+# Remove corresponding columns from SKCM.gene
+SKCM.gene <- SKCM.gene[, !colnames(SKCM.gene) %in% duplicated_row_names, with = FALSE]
+
+
+pc.gene<- read.table("/mnt/ceph/oluw5072/GDCdata/TCGA-SKCM/Analysis/PCA.gene.exp.txt", header=TRUE)
 # Extract the first three elements from the row names and collapse them with hyphens
 new_row_names_gene <- sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-"))
 # Identify duplicated row names
-duplicated_rows_gene <- duplicated(new_row_names_gene)
+duplicated_rows_gene <- which(duplicated(new_row_names_gene) | duplicated(new_row_names_gene, fromLast = TRUE))
+# Get the row names of pc.meth that are duplicated
+duplicated_row_names_gene <- new_row_names[duplicated_rows_gene]
 # Subset the data frame to remove duplicated rows
-pc.gene <- subset(pc.gene, !duplicated_rows_gene)
+pc.gene <- pc.gene[-duplicated_rows_gene,]
 # Assign the modified row names to the unique data frame
-rownames(pc.gene) <- new_row_names_gene[!duplicated_rows_gene]
+rownames(pc.gene) <- new_row_names[-duplicated_rows_gene]
+dim(pc.gene)
 
-
+                             
 #reading in the Trios data
 trios <- data.frame(fread("/mnt/ceph/oluw5072/GDCdata/TCGA-LUAD/Analysis/trio.final.protein.coding.txt"))
 
