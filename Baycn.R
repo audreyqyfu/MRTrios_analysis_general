@@ -31,25 +31,40 @@ cna[1, 1:10]
 #clinical data
 clinical<-fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/split_new_data_clinical_patient.txt")
 
+# Define removeDupsPCs function
+removeDupsPCs <- function(pc, duplicated_rows) {
+  # Extract the first three elements from the row names 
+  new_row_names <- sapply(strsplit(rownames(pc), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+  # Identify duplicated row names
+  duplicated_rows <- duplicated(new_row_names) | duplicated(new_row_names, fromLast = TRUE)
+  # Get the row names of pc that are duplicated
+  duplicated_row_names <- new_row_names[duplicated_rows]
+  # Remove the duplicated rows
+  pc <- pc[!duplicated_rows,]
+  # Assign the modified row names to the unique data frame
+  rownames(pc) <- new_row_names[!duplicated_rows]
+  return(list(pc = pc, duplicated_row_names = duplicated_row_names))
+}
 
 #Read in the PC score matrix
 pc.meth<- read.table("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/PCA.meth.txt", header = TRUE)
-#rownames(pc.meth) <- sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-"))
-#new function to Generate unique row names 
-new_row_names <- make.unique(sapply(strsplit(rownames(pc.meth), "-"), function(parts) paste(parts[1:3], collapse = "-")))
-# assign the modified row names back to the data frame
-rownames(pc.meth) <- new_row_names
-
 
 pc.gene<- read.table("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/PCA.gene.exp.txt",header=TRUE)
-#rownames(pc.gene) <- sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-"))
+# Remove duplicated rows from pc.meth
+result_meth <- removeDupsPCs(pc.meth, NULL)
+pc.meth <- result_meth$pc
+duplicated_row_names_meth <- result_meth$duplicated_row_names
 
-# new function to Generate unique row names 
-new_row_names <- make.unique(sapply(strsplit(rownames(pc.gene), "-"), function(parts) paste(parts[1:3], collapse = "-")))
-# Assign the modified row names back to the data frame
-rownames(pc.gene) <- new_row_names
+# Remove duplicated rows from pc.gene
+result_gene <- removeDupsPCs(pc.gene, NULL)
+pc.gene <- result_gene$pc
+duplicated_row_names_gene <- result_gene$duplicated_row_names
 
+# Remove corresponding columns from BLCA.cna
+BLCA.cna <- BLCA.cna[, !colnames(BLCA.cna) %in% duplicated_row_names_meth, with = FALSE]
 
+# Remove corresponding columns from BLCA.gene
+BLCA.gene <- BLCA.gene[, !colnames(BLCA.gene) %in% duplicated_row_names_gene, with = FALSE]
 
 #reading in the Trios data
 trios <- data.frame(fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis/trio.final.protein.coding.txt"))
