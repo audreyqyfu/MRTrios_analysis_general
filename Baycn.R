@@ -181,10 +181,10 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
 baycn_summary_results <- function(data, trios) {
   results <- list()  # Initialize an empty list to store results
   
-  #begin the loop for rows in trios 
+  # Begin the loop for rows in trios 
   for (i in 1:nrow(trios)) {
     cat("Trio", i, ":\n")
-    data<- datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
+    data <- datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
     
     # Remove race column
     t1 <- data[, -which(names(data) %in% c("race"))]
@@ -199,62 +199,66 @@ baycn_summary_results <- function(data, trios) {
     t4 <- t3[, c(1, 4:ncol(t3), 2, 3)]
     
     # Create an adjacency matrix
-    am_m1<- matrix(0, nrow = ncol(t4), ncol = ncol(t4))
+    am_m1 <- matrix(0, nrow = ncol(t4), ncol = ncol(t4))
     am_m1[, (ncol(t4) - 1):ncol(t4)] <- 1
     am_m1[(ncol(t4)), (ncol(t4))] <- 0
     am_m1[(ncol(t4) - 1), (ncol(t4) - 1)] <- 0
     
     # Run the mhEdge function
-    mh_m1<- mhEdge(data = t4,
-                         adjMatrix = am_m1,
-                         prior = c(0.05, 0.05, 0.9),
-                         nCPh = 0,
-                         nGV = ncol(t4) - 2,
-                         pmr = TRUE,
-                         burnIn = 0.2,
-                         iterations = 1000,
-                         thinTo = 200,
-                         progress = FALSE)
+    mh_m1 <- mhEdge(data = t4,
+                    adjMatrix = am_m1,
+                    prior = c(0.05, 0.05, 0.9),
+                    nCPh = 0,
+                    nGV = ncol(t4) - 2,
+                    pmr = TRUE,
+                    burnIn = 0.2,
+                    iterations = 1000,
+                    thinTo = 200,
+                    progress = FALSE)
     posterior_probs <- mh_m1@posteriorES
     
     # Extract the relevant rows for posterior probabilities
     edges <- posterior_probs[c(1, 2, nrow(posterior_probs)), ]
     
-    # Check inferred model type
-    if (edges[1, "zero"] == max(edges[1, -1]) && 
-        edges[2, "two"] == max(edges[2, -1]) &&
-        edges[nrow(edges), "two"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M0.1"
-    } else if (edges[1, "two"] == max(edges[1, -1]) && 
-               edges[2, "zero"] == max(edges[2, -1]) &&
-               edges[nrow(edges), "two"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M0.2"
-    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
-               edges[2, "two"] == max(edges[2, -1]) &&
-               edges[nrow(edges), "zero"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M1.1"
-    } else if (edges[1, "two"] == max(edges[1, -1]) && 
-               edges[2, "zero"] == max(edges[2, -1]) &&
-               edges[nrow(edges), "one"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M1.2"
-    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
-               edges[2, "two"] == max(edges[2, -1]) &&
-               edges[nrow(edges), "one"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M2.1"
-    } else if (edges[1, "two"] == max(edges[1, -1]) && 
-               edges[2, "zero"] == max(edges[2, -1]) &&
-               edges[nrow(edges), "zero"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M2.2"
-    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
-               edges[2, "zero"] == max(edges[2, -1]) &&
-               edges[nrow(edges), "two"] == max(edges[nrow(edges), -1])) {
-      model_type <- "M3"
-    } else if (edges[1, "zero"] == max(edges[1, -1]) && 
-               edges[2, "zero"] == max(edges[2, -1]) &&
-               (edges[nrow(edges), "zero"] == max(edges[nrow(edges), -1]) || edges[nrow(edges), "one"] == max(edges[nrow(edges), -1]))) {
-      model_type <- "M4"
+    if (sum(edges[3, c("zero", "one")]) > 0.5) {
+  # Check the direction
+  #If there is an edge between V2 and V3, we have models M1.1, M1.2, M2.1, M2.2, and M4
+  #If the edge is directed from V2 to V3, we have models M1.1 and M2.2
+      if (edges[3, "zero"] == max(edges[3, -1])) {
+        if (edges[1, "zero"] == max(edges[1, -1]) && 
+            edges[2, "two"] == max(edges[2, -1])) {
+          model_type <- "M1.1"
+        } else if (edges[1, "two"] == max(edges[1, -1]) && 
+                   edges[2, "zero"] == max(edges[2, -1])) {
+          model_type <- "M2.2"
+        }#If the edge is directed from V3 to V2, we have models M1.2 and M2.1
+      } else if (edges[3, "one"] == max(edges[3, -1])) {
+        if (edges[1, "two"] == max(edges[1, -1]) && 
+            edges[2, "zero"] == max(edges[2, -1])) {
+          model_type <- "M1.2"
+        } else if (edges[1, "zero"] == max(edges[1, -1]) && 
+                   edges[2, "two"] == max(edges[2, -1])) {
+          model_type <- "M2.1"
+        }  #If the edge is bidirectional, we have model M4
+      } else if (edges[3, "zero"] == edges[3, "one"]) {
+        if (edges[1, "zero"] == max(edges[1, -1]) && 
+            edges[2, "zero"] == max(edges[2, -1])) {
+          model_type <- "M4"
+        }
+      }#If there is no edge between V2 and V3, we have models M0.1, M0.2, M3 and other
     } else {
-      model_type <- "Other"
+      if (edges[1, "zero"] == max(edges[1, -1]) && 
+          edges[2, "two"] == max(edges[2, -1])) {
+        model_type <- "M0.1"
+      } else if (edges[1, "two"] == max(edges[1, -1]) && 
+                 edges[2, "zero"] == max(edges[2, -1])) {
+        model_type <- "M0.2"
+      } else if (edges[1, "zero"] == max(edges[1, -1]) && 
+                 edges[2, "zero"] == max(edges[2, -1])) {
+        model_type <- "M3"
+      } else {
+        model_type <- "Other"
+      }
     }
     
     # Store results
