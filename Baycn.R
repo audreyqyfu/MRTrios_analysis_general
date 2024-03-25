@@ -193,13 +193,29 @@ datamatrix<- function(TCGA.meth, gene.exp, cna, trios, pc.meth, pc.gene, meth.si
 #data=datamatrix(meth, gene, cna, trios[1,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]],clinical, meth.table, gene.table,age.col=5, race.col=26,sex.col=6)
 
 
-baycn_summary_results <- function(data, trios) {
-  results <- list()  # Initialize an empty list to store results
-  
+baycn_summary_results <- function(data, trios, p, writeToFile = FALSE, file) {
+  results <- data.frame(Trio = integer(), Model = character(), stringsAsFactors = FALSE)  # Initialize an empty dataframe to store results
+    # write to file if writeToFile is TRUE
+    if (writeToFile) {
+      results.colnames <- c("Trio", "Inferred.Model")
+      write.table(t(results.colnames), file = file, sep = "\t", row.names = FALSE, col.names = FALSE, append = FALSE, quote = FALSE)
+    }
   # Begin the loop for rows in trios 
   for (i in 1:nrow(trios)) {
     cat("Trio", i, ":\n")
-    data <- datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
+    
+    data <- tryCatch(
+      {
+        datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
+      },
+      error = function(e) {
+        return(NULL)
+      }
+    )
+    
+    if (is.null(data)) {
+      next  # Skip to the next trio if data is NULL
+    }
     
     # Remove race column
     t1 <- data[, -which(names(data) %in% c("race"))]
@@ -235,59 +251,101 @@ baycn_summary_results <- function(data, trios) {
     # Extract the relevant rows for posterior probabilities
     edges <- posterior_probs[c(1, 2, nrow(posterior_probs)), ]
     
-    if (sum(edges[3, c("zero", "one")]) > 0.5) {
-  # Check the direction
-  #If there is an edge between V2 and V3, we have models M1.1, M1.2, M2.1, M2.2, and M4
-  #If the edge is directed from V2 to V3, we have models M1.1 and M2.2
-      if (edges[3, "zero"] == max(edges[3, -1])) {
-        if (edges[1, "zero"] == max(edges[1, -1]) && 
-            edges[2, "two"] == max(edges[2, -1])) {
-          model_type <- "M1.1"
-        } else if (edges[1, "two"] == max(edges[1, -1]) && 
-                   edges[2, "zero"] == max(edges[2, -1])) {
-          model_type <- "M2.2"
-        }#If the edge is directed from V3 to V2, we have models M1.2 and M2.1
-      } else if (edges[3, "one"] == max(edges[3, -1])) {
-        if (edges[1, "two"] == max(edges[1, -1]) && 
-            edges[2, "zero"] == max(edges[2, -1])) {
-          model_type <- "M1.2"
-        } else if (edges[1, "zero"] == max(edges[1, -1]) && 
-                   edges[2, "two"] == max(edges[2, -1])) {
-          model_type <- "M2.1"
-        }  #If the edge is bidirectional, we have model M4
-      } else if (edges[3, "zero"] == edges[3, "one"]) {
-        if (edges[1, "zero"] == max(edges[1, -1]) && 
-            edges[2, "zero"] == max(edges[2, -1])) {
-          model_type <- "M4"
+    if (!is.null(edges)) { # Check if edges are not NULL
+      if (edges[1, "zero"] == max(edges[1, -1])) {
+        # Check the direction of edge V2 and V3
+        # If there is an edge between V2 and V3, we have models M1.1, M1.2, M2.1, M2.2, and M4
+        # If the edge is directed from V2 to V3, we have models M1.1, M2.2 and M4
+        if (edges[2, "zero"] == max(edges[2, -1])) {
+          if (sum(edges[3, c("zero", "one")]) > 0.5) {
+            model_type <- "M4"
+          } else {
+            model_type <- "M3"
+          }
+        } else if (edges[2, "two"] == max(edges[2, -1])) {
+          # Edge is directed from V2 to V3 (in edge 3 maximum prob. is on status "zero")
+          if (sum(edges[3, c("zero", "one")]) > 0.5) {
+            if (edges[3, "zero"] == max(edges[3, -1])) {
+              model_type <- "M1.1"
+            } else if (edges[3, "one"] == max(edges[3, -1])) {
+              model_type <- "M2.1"
+            }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {
+              model_type<-"other"
+            }
+          } else {
+            model_type <- "M0.1"
+          }
         }
-      }#If there is no edge between V2 and V3, we have models M0.1, M0.2, M3 and other
-    } else {
-      if (edges[1, "zero"] == max(edges[1, -1]) && 
-          edges[2, "two"] == max(edges[2, -1])) {
-        model_type <- "M0.1"
-      } else if (edges[1, "two"] == max(edges[1, -1]) && 
-                 edges[2, "zero"] == max(edges[2, -1])) {
-        model_type <- "M0.2"
-      } else if (edges[1, "zero"] == max(edges[1, -1]) && 
-                 edges[2, "zero"] == max(edges[2, -1])) {
-        model_type <- "M3"
-      } else {
-        model_type <- "Other"
+      } else if (edges[1, "two"] == max(edges[1, -1])) {
+        if (edges[2, "zero"] == max(edges[2, -1])) {
+          if (sum(edges[3, c("zero", "one")]) > 0.5) {
+            if (edges[3, "zero"] == max(edges[3, -1])) {
+              model_type <- "M2.2"
+            } else if (edges[3, "one"] == max(edges[3, -1])) {
+              model_type <- "M1.2"
+            }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {
+              model_type<-"other"
+            }
+          } else {
+            model_type <- "M0.2"
+          }
+        } else if (edges[2, "two"] == max(edges[2, -1])) {
+          model_type <- "other"
+        }
       }
     }
+    # Store results only if edges are not NULL
+    results <- rbind(results, data.frame(Trio= i, Inferred.Model = model_type))
     
-    # Store results
-    results[[i]] <- list(summary_mh=edges,model = model_type)
-    
-    cat("\n")
-    cat("Summary:\n")
-    print(results[[i]]$summary_mh)
-    cat("Inferred model:\n")
-    print(results[[i]]$model)
-    cat("\n\n")
-  }
-  
+      # Write to file if writeToFile is TRUE
+      if (writeToFile) {
+        write.table(data.frame(Trio= i, Inferred.Model = model_type), file = file, sep = "\t", row.names = FALSE, col.names = FALSE, append = TRUE, quote = FALSE)
+      }
+   }
+
   return(results)
 }
 
-baycn.results <- baycn_summary_results(data, trios[1:5,])
+baycn.results <- baycn_summary_results(data, trios[30001:60000, ], p=0.2, writeToFile =TRUE, file= "/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis1/baycn2.txt")
+
+
+###########################################################################################3
+
+data1<-fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/analyze.trios.BLCA.split1.txt")
+
+data2<-fread("/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/baycn11.txt")
+
+
+# Function to create a confusion matrix
+create_confusion_matrix <- function(data1, data2) {
+  # Extract trios and inferred models from both datasets
+  trios_data1 <- data1$Index
+  models_data1 <- data1$Inferred.Model
+  
+  trios_data2 <- data2$Index
+  models_data2 <- data2$Inferred.Model
+  
+  # List of all possible models
+  all_models <- c("M0.1", "M0.2", "M1.1", "M1.2", "M2.1", "M2.2", "M3", "M4", "Other")
+  
+  # Create an empty confusion matrix
+  confusion_matrix <- matrix(0, nrow = length(all_models), ncol = length(all_models), 
+                             dimnames = list(all_models, all_models))
+  
+  # Iterate through each trio
+  for (i in 1:length(trios_data1)) {
+    trio <- trios_data1[i]
+    model_data1 <- models_data1[i]
+    model_data2 <- models_data2[i]
+    
+    # Update the confusion matrix based on the models
+    confusion_matrix[model_data1, model_data2] <- confusion_matrix[model_data1, model_data2] + 1
+  }
+  
+  return(confusion_matrix)
+}
+
+# Usage example:
+# Assuming data1 and data2 are the datasets containing trios and inferred models
+confusion_matrix <- create_confusion_matrix(data1, data2)
+print(confusion_matrix)
