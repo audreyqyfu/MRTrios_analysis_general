@@ -204,14 +204,8 @@ baycn_summary_results <- function(data, trios, p, writeToFile = FALSE, file) {
   for (i in 1:nrow(trios)) {
     cat("Trio", i, ":\n")
     
-    data <- tryCatch(
-      {
-        datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
-      },
-      error = function(e) {
-        return(NULL)
-      }
-    )
+    data <- datamatrix(meth, gene, cna, trios[i,], pc.meth, pc.gene, meth.sig.asso.pcs[[1]], gene.sig.asso.pcs[[1]], clinical, meth.table, gene.table, age.col = 5, race.col = 26, sex.col = 6)
+      
     
     if (is.null(data)) {
       next  # Skip to the next trio if data is NULL
