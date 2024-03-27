@@ -246,45 +246,41 @@ baycn_summary_results <- function(data, trios, p, writeToFile = FALSE, file) {
     edges <- posterior_probs[c(1, 2, nrow(posterior_probs)), ]
     
     if (!is.null(edges)) { # Check if edges are not NULL
-      if (edges[1, "zero"] == max(edges[1, -1])) {
-        # Check the direction of edge V2 and V3
-        # If there is an edge between V2 and V3, we have models M1.1, M1.2, M2.1, M2.2, and M4
-        # If the edge is directed from V2 to V3, we have models M1.1, M2.2 and M4
-        if (edges[2, "zero"] == max(edges[2, -1])) {
-          if (sum(edges[3, c("zero", "one")]) > 0.5) {
+      if (edges[1, "zero"] == max(edges[1, -1])) {#Edge between V1-->V2
+        if (edges[2, "zero"] == max(edges[2, -1])) {#Edge between V1-->V3
+          if (sum(edges[3, c("zero", "one")]) > 0.5) {# If there's a edge between V2-V3
             model_type <- "M4"
           } else {
-            model_type <- "M3"
+            model_type <- "M3" #no Edge V2-V3
           }
-        } else if (edges[2, "two"] == max(edges[2, -1])) {
-          # Edge is directed from V2 to V3 (in edge 3 maximum prob. is on status "zero")
-          if (sum(edges[3, c("zero", "one")]) > 0.5) {
-            if (edges[3, "zero"] == max(edges[3, -1])) {
+        } else if (edges[2, "two"] == max(edges[2, -1])) {#no Edge between V1-V3
+          if (sum(edges[3, c("zero", "one")]) > 0.5) {# If there's a edge between V2-V3
+            if (edges[3, "zero"]>edges[3,"one"]) {#Edge V2-->V3
               model_type <- "M1.1"
-            } else if (edges[3, "one"] == max(edges[3, -1])) {
+            } else if (edges[3, "one"] >edges[3, "zero"]) {#Edge V3-->V2
               model_type <- "M2.1"
-            }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {
-              model_type<-"other"
+            }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {#Edge V2<-->V3
+              model_type<-"Other"
             }
           } else {
-            model_type <- "M0.1"
+            model_type <- "M0.1" #no Edge V2-V3
           }
         }
-      } else if (edges[1, "two"] == max(edges[1, -1])) {
+      } else if (edges[1, "two"] == max(edges[1, -1])) {# no edge between V1-V2
         if (edges[2, "zero"] == max(edges[2, -1])) {
           if (sum(edges[3, c("zero", "one")]) > 0.5) {
-            if (edges[3, "zero"] == max(edges[3, -1])) {
+            if (edges[3, "zero"]>edges[3, "one"]) {
               model_type <- "M2.2"
-            } else if (edges[3, "one"] == max(edges[3, -1])) {
+            } else if (edges[3, "one"]>edges[3,"zero"]) {
               model_type <- "M1.2"
             }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {
-              model_type<-"other"
+              model_type<-"Other"
             }
           } else {
             model_type <- "M0.2"
           }
-        } else if (edges[2, "two"] == max(edges[2, -1])) {
-          model_type <- "other"
+        } else if (edges[2, "two"] == max(edges[2, -1])) {#no Edge between V1-V3
+          model_type <- "Other"
         }
       }
     }
@@ -299,6 +295,7 @@ baycn_summary_results <- function(data, trios, p, writeToFile = FALSE, file) {
 
   return(results)
 }
+
 
 baycn.results <- baycn_summary_results(data, trios[30001:60000, ], p=0.2, writeToFile =TRUE, file= "/mnt/ceph/fern5249/GDCdata/TCGA-BLCA/Analysis1/baycn2.txt")
 
