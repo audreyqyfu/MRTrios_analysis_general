@@ -255,9 +255,9 @@ baycn_summary_results <- function(data, trios, p, writeToFile = FALSE, file) {
           }
         } else if (edges[2, "two"] == max(edges[2, -1])) {#no Edge between V1-V3
           if (sum(edges[3, c("zero", "one")]) > 0.5) {# If there's a edge between V2-V3
-            if (edges[3, "zero"]>edges[3,"one"]) {#Edge V2-->V3
+            if (edges[3, "zero"]-edges[3,"one"]>p) {#Edge V2-->V3
               model_type <- "M1.1"
-            } else if (edges[3, "one"] >edges[3, "zero"]) {#Edge V3-->V2
+            } else if (edges[3, "one"]-edges[3, "zero"]>p) {#Edge V3-->V2
               model_type <- "M2.1"
             }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {#Edge V2<-->V3
               model_type<-"Other"
@@ -269,9 +269,9 @@ baycn_summary_results <- function(data, trios, p, writeToFile = FALSE, file) {
       } else if (edges[1, "two"] == max(edges[1, -1])) {# no edge between V1-V2
         if (edges[2, "zero"] == max(edges[2, -1])) {
           if (sum(edges[3, c("zero", "one")]) > 0.5) {
-            if (edges[3, "zero"]>edges[3, "one"]) {
+            if (edges[3, "zero"]-edges[3, "one"]>p) {
               model_type <- "M2.2"
-            } else if (edges[3, "one"]>edges[3,"zero"]) {
+            } else if (edges[3, "one"]-edges[3,"zero"]>p) {
               model_type <- "M1.2"
             }else if (abs(edges[3, "zero"] - edges[3, "one"]) < p) {
               model_type<-"Other"
